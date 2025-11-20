@@ -1,0 +1,25 @@
+services:
+  index-tts:
+    build:
+      context: .
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+    image: anyshpm/index-tts:2.0-beta
+    container_name: index-tts
+    restart: unless-stopped
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./tmp:/tmp
+      # Mount checkpoints to avoid redownloading on container recreation
+      - ./checkpoints:/app/index-tts/checkpoints
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - http_proxy=${http_proxy}
+      - https_proxy=${https_proxy}
