@@ -2,10 +2,10 @@ name: Docker Build and Push
 
 on:
   push:
-    branches: [ "*" ]
+    branches: [ "main" ]
     tags: [ 'v*.*.*' ]
   pull_request:
-    branches: [ "*" ]
+    branches: [ "main" ]
 
 env:
   # Use docker.io for Docker Hub if empty
