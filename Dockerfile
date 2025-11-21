@@ -1,5 +1,5 @@
 # Build stage
-FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04
+FROM ubuntu:jammy
 
 # Define build arguments for proxies
 ARG http_proxy
@@ -8,6 +8,7 @@ ARG https_proxy
 # Set environment variables from build arguments
 ENV http_proxy=$http_proxy
 ENV https_proxy=$https_proxy
+ENV PATH="$PATH:/root/.local/bin"
 
 # Install system dependencies for building
 RUN apt-get update && \
@@ -16,10 +17,13 @@ RUN apt-get update && \
     git \
     git-lfs \
     python3-pip \
-    python3-venv \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && git lfs install
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
+    dpkg -i cuda-keyring_1.1-1_all.deb && \
+    apt-get update && \
+    apt-get -y install cuda-compiler-12-8
 
 WORKDIR /app/
 
@@ -30,16 +34,14 @@ RUN git clone https://github.com/index-tts/index-tts.git
 WORKDIR /app/index-tts
 
 # Install python dependencies
-RUN python3 -m venv .venv --copies && \
-    . .venv/bin/activate && \
-    pip install -U uv && \
+RUN pip install -U uv && \
     uv sync --all-extras
 
 # Download models
-RUN . .venv/bin/activate && \
-    uv tool install "modelscope" && \
-    modelscope download --model IndexTeam/IndexTTS-2 --local_dir checkpoints && \
+RUN uv tool install "huggingface-hub[cli,hf_xet]" && \
+    hf download IndexTeam/IndexTTS-2 --local-dir=checkpoints && \
     uv run tools/gpu_check.py
+    
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
