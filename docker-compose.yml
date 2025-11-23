@@ -7,13 +7,12 @@ services:
     #    https_proxy: ${https_proxy}
     image: anyshpm/index-tts:2.0-beta
     container_name: index-tts
-    restart: unless-stopped
+    #restart: unless-stopped
     ports:
       - "7860:7860"
-    #volumes:
-      #- ./tmp:/tmp
+    volumes:
       # Mount checkpoints to avoid redownloading on container recreation
-      #- ./checkpoints:/app/index-tts/checkpoints
+      - ./checkpoints:/app/index-tts/checkpoints
     deploy:
       resources:
         reservations:
